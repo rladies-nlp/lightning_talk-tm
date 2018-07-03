@@ -1,0 +1,160 @@
+
+Lightning talk on text mining Package (tm) in R
+========================================================
+author:  Ravi Taneja
+date:  06-26-2018
+autosize: true
+
+Some Basic Concepts
+========================================================
+
+-- Corpus : The basic structure in **tm** for managing documents, it represents a collection of text documents.
+
+-- Corpora : Plural for Corpora
+
+-- Stemming : Stemming usually refers to a crude heuristic process that chops off the ends of words in the hope of achieving this goal correctly most of the time, and often includes the removal of derivational affixes.
+e.g. reducing derived words like **says**, **said** into **say**
+
+-- Lemmatization : refers to doing things properly with the use of a vocabulary and morphological analysis of words, normally aiming to remove inflectional endings only and to return the base or dictionary form of a word, which is known as the lemma
+
+e.g. If the token is **saw**, lemmatization would attempt to return either **see** or **saw** depending on whether the use of the token was as a verb or a noun
+
+Loading required packages and text into the Corpus
+========================================================
+
+```{r}
+library(tm)
+library(SnowballC)
+library(wordcloud)
+# tm package provides 3 predefined set of text sources: DirSource, VectorSource, DataframeSource
+shakespeare <- VCorpus(DirSource("tm_data", encoding = "UTF-8"))
+
+## Writing the Corpus files to the hard disk
+writeCorpus(shakespeare)
+```
+
+Inspecting the Corpus "Shakespeare"
+========================================================
+
+```{r}
+#Meta data of the Corpus
+summary(shakespeare)
+
+# Meta data of each document 
+meta(shakespeare[[1]])
+
+```
+
+Inspecting the Corpus "Shakespeare"
+========================================================
+
+```{r}
+# Inspect the documents
+inspect(shakespeare[1:2])
+
+```
+
+Corpus transformations: Removing white Spaces
+========================================================
+```{r}
+# Removing white Spaces
+shakespeare <- tm_map(shakespeare, stripWhitespace, lazy=FALSE)
+writeLines(as.character(shakespeare[[1]])[200:250])
+```
+
+Corpus transformations: Stemming
+========================================================
+```{r}
+options(width = 400)
+# Stemming 
+shakespeare <- tm_map(shakespeare, stemDocument, lazy=FALSE)
+writeLines(as.character(shakespeare[[1]])[200:250])
+```
+
+Corpus transformations: Remove punctuation
+========================================================
+```{r}
+# Removing punctuation
+shakespeare <- tm_map(shakespeare, removePunctuation, lazy=FALSE)
+writeLines(as.character(shakespeare[[1]])[200:250])
+
+```
+
+Corpus transformations: Remove stopwords
+========================================================
+```{r}
+# Remove stopwords
+shakespeare <- tm_map(shakespeare, content_transformer(removeWords), stopwords("english"), lazy=FALSE)
+writeLines(as.character(shakespeare[[1]])[200:250])
+```
+
+Corpus transformations: Convert to lowercase
+========================================================
+```{r}
+# Remove stopwords
+shakespeare <- tm_map(shakespeare, content_transformer(tolower), lazy = FALSE)
+writeLines(as.character(shakespeare[[1]])[200:250])
+```
+
+Term-Document Matrices
+========================================================
+```{r}
+# Many algorithms in NLP operate on word frequency table and we call it document-term matrix. 
+# In tm package we either TermDocumentMatrix or DocumentTermMatrix and it employs sparse matrices for Corpora
+dtm <- DocumentTermMatrix(shakespeare)
+inspect(dtm)
+```
+
+Term-Document Matrices: Operations
+========================================================
+```{r}
+# Find terms that occur at least five times 
+
+highFreqTerms <- findFreqTerms(dtm, 25, )
+summary(highFreqTerms)
+```
+
+Term-Document Matrices: Top 20 terms
+========================================================
+```{r}
+# Find terms that occur at least five times 
+
+highFreqTerms[1:15]
+```
+
+Visualization - Word Cloud with words of Frequency higher than 1500
+========================================================
+```{r, echo = FALSE}
+freq <- sort(colSums(as.matrix(dtm)),decreasing=TRUE)
+set.seed(1234)
+wordcloud(names(freq), freq, min.freq=800, max.words = 400, colors=brewer.pal(8, "Dark2"))
+```
+
+
+
+
+
+
+References:
+========================================================
+1. https://nlp.stanford.edu/IR-book/html/htmledition/contents-1.html
+
+2. http://angerhang.github.io/statsWithR/tutorials/textMiningIntro.html
+
+3. https://cran.r-project.org/web/packages/tm/vignettes/tm.pdf
+
+4. https://rstudio-pubs-static.s3.amazonaws.com/265713_cbef910aee7642dc8b62996e38d2825d.html
+
+5. https://eight2late.wordpress.com/2015/05/27/a-gentle-introduction-to-text-mining-using-r/
+
+
+
+
+
+
+
+
+
+
+
+
